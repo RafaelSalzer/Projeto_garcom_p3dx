@@ -88,26 +88,3 @@ Mandar o robô ir até o balcão buscar a comida.
 Aguardar no balcão por alguns segundos.
 
 Mandar o robô navegar até a mesa exata do cliente para a entrega!
-
-🗺️ Como Refazer o Mapeamento (Avançado)
-
-Caso mude as mesas de lugar no arquivo .world, você precisará gerar um novo mapa:
-
-Abra a simulação (simulacao.launch).
-
-Rode o Gmapping:
-
-rosrun gmapping slam_gmapping scan:=/laser/scan
-
-
-Movimente o robô manualmente:
-
-rosrun teleop_twist_keyboard teleop_twist_keyboard.py
-
-
-Salve o mapa:
-
-rosrun map_server map_saver -f ~/catkin_ws/src/projeto_garcom_p3dx/garcom_mapping/maps/mapa_novo
-
-
-Atualize o arquivo navegacao.launch para usar o novo mapa salvo.
