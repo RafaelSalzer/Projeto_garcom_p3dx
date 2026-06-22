@@ -2,6 +2,7 @@
 import rospy
 import actionlib
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+from std_msgs.msg import String
 
 # Banco de dados das coordenadas do restaurante
 # Valores capturados do RViz via /move_base_simple/goal
@@ -47,26 +48,31 @@ def enviar_robo_para_mesa(id_mesa):
         else:
             rospy.logwarn("O robô não conseguiu alcançar o destino. Caminho bloqueado?")
 
+def callback_pedido_web(msg):
+    """Função ativada automaticamente quando o botão do site é clicado"""
+    escolha = msg.data.lower().strip()
+    rospy.loginfo(f"Novo pedido recebido via Tablet/Web: Destino -> {escolha}")
+    
+    if escolha in mesas:
+        enviar_robo_para_mesa(escolha)
+    else:
+        rospy.logwarn(f"Comando desconhecido recebido da Web: {escolha}")
+
 if __name__ == '__main__':
     try:
         # Inicia o nó ROS
         rospy.init_node('despacho_pedidos')
         
-        while not rospy.is_shutdown():
-            print("\n" + "="*40)
-            print("        SISTEMA DO ROBÔ GARÇOM")
-            print("="*40)
-            print("Destinos disponíveis: 1, 2, 3, balcao")
-            print("Digite 'sair' para encerrar o sistema.")
-            
-            escolha = input("\nPara onde o robô deve ir? ").lower().strip()
-            
-            if escolha == 'sair':
-                break
-            elif escolha in mesas:
-                enviar_robo_para_mesa(escolha)
-            else:
-                print("Destino inválido! Digite apenas 1, 2, 3 ou balcao.")
+        rospy.loginfo("="*40)
+        rospy.loginfo(" SISTEMA DO GARÇOM (MODO WEB ATIVADO) ")
+        rospy.loginfo("="*40)
+        rospy.loginfo("Aguardando comandos do aplicativo HTML...")
+        
+        # Cria o "ouvido" do robô para escutar a página web
+        rospy.Subscriber('/web_pedidos', String, callback_pedido_web)
+        
+        # O rospy.spin() mantém o programa rodando em segundo plano esperando mensagens
+        rospy.spin()
                 
     except rospy.ROSInterruptException:
         rospy.loginfo("Sistema de despacho encerrado pelo usuário.")
