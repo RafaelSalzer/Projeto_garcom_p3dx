@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardápio Digital - Garçom Autônomo</title>
+    
+    <!-- Tailwind CSS para estilização moderna e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Bibliotecas de conexão do ROS (RoslibJS) -->
+    <script src="https://cdn.jsdelivr.net/npm/eventemitter2@6/lib/eventemitter2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
+        .btn-press:active { transform: scale(0.95); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 lg:p-8">
+
+    <!-- ==================== TELA 1: CONFIGURAÇÃO INICIAL ==================== -->
+    <div id="setup-screen" class="w-full max-w-2xl flex flex-col items-center">
+        <h1 class="text-3xl md:text-5xl font-bold mb-2 text-blue-400 tracking-wide text-center">Configuração da Mesa</h1>
+        <p class="text-slate-400 mb-8 text-center">Configure o tablet antes de entregar ao cliente.</p>
+        
+        <div class="w-full bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700">
+            <!-- Escolha da Mesa -->
+            <label class="block text-lg font-bold text-slate-200 mb-4">1. Selecione a Mesa deste Tablet:</label>
+            <div class="grid grid-cols-3 gap-4 mb-8">
+                <button onclick="selecionarMesa('1')" id="btn-mesa-1" class="mesa-selector py-4 rounded-xl border-2 border-slate-600 bg-slate-700 font-bold text-xl hover:bg-slate-600 transition-colors">Mesa 1</button>
+                <button onclick="selecionarMesa('2')" id="btn-mesa-2" class="mesa-selector py-4 rounded-xl border-2 border-slate-600 bg-slate-700 font-bold text-xl hover:bg-slate-600 transition-colors">Mesa 2</button>
+                <button onclick="selecionarMesa('3')" id="btn-mesa-3" class="mesa-selector py-4 rounded-xl border-2 border-slate-600 bg-slate-700 font-bold text-xl hover:bg-slate-600 transition-colors">Mesa 3</button>
+            </div>
+
+            <!-- Conexão ROS -->
+            <label class="block text-lg font-bold text-slate-200 mb-4">2. Conectar ao Sistema do Robô:</label>
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="ip-input" value="192.168.1.120" class="w-full px-4 py-3 rounded-lg bg-slate-900 border border-slate-600 text-white focus:outline-none focus:border-blue-500 font-mono text-lg">
+                <button onclick="conectarROS()" class="btn-press bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-lg font-bold transition-colors">Conectar</button>
+            </div>
+            
+            <div id="status-box" class="p-3 rounded-lg bg-slate-900 border-2 border-red-500 text-red-400 font-semibold flex items-center justify-center gap-2">
+                <div id="status-dot" class="w-3 h-3 rounded-full bg-red-500"></div>
+                <span id="status-text">DESCONECTADO</span>
+            </div>
+
+            <button onclick="iniciarAtendimento()" id="btn-iniciar" class="w-full mt-8 bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-xl font-bold text-xl transition-colors opacity-50 cursor-not-allowed" disabled>
+                Iniciar Atendimento
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== TELA 2: CARDÁPIO (Interface do Cliente) ==================== -->
+    <div id="app-screen" class="w-full max-w-4xl hidden flex-col items-center">
+        <!-- Cabeçalho -->
+        <div class="w-full flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
+            <h1 class="text-3xl font-bold text-emerald-400">Restaurante P3DX</h1>
+            <div class="bg-slate-800 px-6 py-2 rounded-full border border-slate-600">
+                <span class="text-slate-300 font-medium">Você está na: </span>
+                <span id="display-mesa" class="text-white font-bold text-xl">Mesa X</span>
+            </div>
+        </div>
+
+        <!-- Seção do Cardápio -->
+        <div id="menu-section" class="w-full">
+            <h2 class="text-2xl font-bold mb-6 text-white">Nosso Cardápio</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Prato 1 -->
+                <div class="bg-slate-800 rounded-2xl overflow-hidden shadow-lg border border-slate-700 card-hover flex flex-col">
+                    <div class="h-40 bg-slate-700 flex items-center justify-center text-6xl">🍔</div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h3 class="text-xl font-bold text-white mb-2">Hambúrguer Artesanal</h3>
+                        <p class="text-slate-400 text-sm mb-4 flex-1">Hambúrguer de 200g, queijo cheddar, bacon crocante e molho especial.</p>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-emerald-400 font-bold text-xl">R$ 35,00</span>
+                            <span class="text-slate-500 text-sm">⏱️ 30s prep.</span>
+                        </div>
+                        <button onclick="fazerPedido('Hambúrguer Artesanal', 30)" class="btn-press w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-lg font-bold">Pedir Agora</button>
+                    </div>
+                </div>
+
+                <!-- Prato 2 -->
+                <div class="bg-slate-800 rounded-2xl overflow-hidden shadow-lg border border-slate-700 card-hover flex flex-col">
+                    <div class="h-40 bg-slate-700 flex items-center justify-center text-6xl">🍕</div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h3 class="text-xl font-bold text-white mb-2">Pizza Margherita</h3>
+                        <p class="text-slate-400 text-sm mb-4 flex-1">Massa de fermentação natural, molho de tomate fresco, muçarela de búfala e manjericão.</p>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-emerald-400 font-bold text-xl">R$ 48,00</span>
+                            <span class="text-slate-500 text-sm">⏱️ 40s prep.</span>
+                        </div>
+                        <button onclick="fazerPedido('Pizza Margherita', 40)" class="btn-press w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-lg font-bold">Pedir Agora</button>
+                    </div>
+                </div>
+
+                <!-- Prato 3 -->
+                <div class="bg-slate-800 rounded-2xl overflow-hidden shadow-lg border border-slate-700 card-hover flex flex-col">
+                    <div class="h-40 bg-slate-700 flex items-center justify-center text-6xl">🍝</div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h3 class="text-xl font-bold text-white mb-2">Espaguete Carbonara</h3>
+                        <p class="text-slate-400 text-sm mb-4 flex-1">Receita tradicional italiana com guanciale, pecorino romano e pimenta preta.</p>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-emerald-400 font-bold text-xl">R$ 52,00</span>
+                            <span class="text-slate-500 text-sm">⏱️ 45s prep.</span>
+                        </div>
+                        <button onclick="fazerPedido('Espaguete Carbonara', 45)" class="btn-press w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-lg font-bold">Pedir Agora</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Seção de Acompanhamento do Pedido -->
+        <div id="status-section" class="w-full hidden mt-8">
+            <div class="bg-slate-800 p-8 rounded-2xl shadow-xl border border-blue-500/30 text-center">
+                <h2 class="text-3xl font-bold text-white mb-2" id="pedido-nome">Seu Pedido</h2>
+                <p class="text-blue-400 text-xl font-medium mb-8" id="pedido-fase">Fase do Pedido</p>
+                
+                <!-- Círculo de Progresso/Contador -->
+                <div class="relative w-48 h-48 mx-auto mb-8 flex items-center justify-center bg-slate-900 rounded-full border-4 border-slate-700">
+                    <div id="contador-tempo" class="text-5xl font-bold text-emerald-400">00</div>
+                    <div class="absolute bottom-6 text-slate-400 text-sm">segundos</div>
+                </div>
+
+                <div class="w-full bg-slate-700 rounded-full h-4 mb-4 overflow-hidden">
+                    <div id="barra-progresso" class="bg-blue-500 h-4 rounded-full transition-all duration-1000 w-0"></div>
+                </div>
+                
+                <p class="text-slate-400 mt-6 text-sm">Por favor, aguarde na mesa. O nosso robô entregará o seu prato assim que estiver pronto!</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts de Lógica e Comunicação -->
+    <script>
+        var ros = null;
+        var topicoPedidos = null;
+        var mesaConfigurada = null;
+        var timerInterval = null;
+
+        // Tenta preencher o IP automaticamente
+        if (window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            document.getElementById('ip-input').value = window.location.hostname;
+        }
+
+        // ================= LÓGICA DE CONFIGURAÇÃO (TELA 1) =================
+        function selecionarMesa(numero) {
+            mesaConfigurada = numero;
+            // Atualiza botões visualmente
+            document.querySelectorAll('.mesa-selector').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'border-blue-400', 'text-white');
+                btn.classList.add('bg-slate-700', 'border-slate-600');
+            });
+            let btnAtivo = document.getElementById('btn-mesa-' + numero);
+            btnAtivo.classList.remove('bg-slate-700', 'border-slate-600');
+            btnAtivo.classList.add('bg-blue-600', 'border-blue-400', 'text-white');
+            
+            verificarLiberacao();
+        }
+
+        function conectarROS() {
+            var ip = document.getElementById('ip-input').value.trim();
+            if (!ip) return alert("Por favor, digite o IP!");
+
+            let statusBox = document.getElementById('status-box');
+            let statusText = document.getElementById('status-text');
+            let statusDot = document.getElementById('status-dot');
+
+            statusText.innerText = "Conectando...";
+            statusDot.className = "w-3 h-3 rounded-full bg-yellow-500 animate-pulse";
+
+            if (ros !== null) ros.close();
+
+            ros = new ROSLIB.Ros({ url : 'ws://' + ip + ':9090' });
+
+            ros.on('connection', function() {
+                statusBox.className = "p-3 rounded-lg bg-slate-900 border-2 border-emerald-500 text-emerald-400 font-semibold flex items-center justify-center gap-2";
+                statusDot.className = "w-3 h-3 rounded-full bg-emerald-500";
+                statusText.innerText = "SISTEMA ONLINE";
+                
+                topicoPedidos = new ROSLIB.Topic({
+                    ros : ros,
+                    name : '/web_pedidos',
+                    messageType : 'std_msgs/String'
+                });
+                
+                verificarLiberacao();
+            });
+
+            ros.on('error', function() {
+                statusBox.className = "p-3 rounded-lg bg-slate-900 border-2 border-red-500 text-red-400 font-semibold flex items-center justify-center gap-2";
+                statusDot.className = "w-3 h-3 rounded-full bg-red-500 animate-ping";
+                statusText.innerText = "FALHA NA CONEXÃO";
+            });
+        }
+
+        function verificarLiberacao() {
+            let btnIniciar = document.getElementById('btn-iniciar');
+            if (mesaConfigurada !== null && ros !== null && ros.isConnected) {
+                btnIniciar.disabled = false;
+                btnIniciar.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function iniciarAtendimento() {
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            document.getElementById('app-screen').classList.add('flex');
+            document.getElementById('display-mesa').innerText = 'Mesa ' + mesaConfigurada;
+        }
+
+        // ================= LÓGICA DE AUTOMAÇÃO E PEDIDOS (TELA 2) =================
+        function enviarComandoROS(destino) {
+            if (!ros || !ros.isConnected) return console.error("ROS Desconectado!");
+            var mensagem = new ROSLIB.Message({ data : destino });
+            topicoPedidos.publish(mensagem);
+            console.log("Comando enviado via ROS: " + destino);
+        }
+
+        function atualizarContador(segundos, faseAtual, maxSegundos) {
+            document.getElementById('contador-tempo').innerText = segundos;
+            let porcentagem = ((maxSegundos - segundos) / maxSegundos) * 100;
+            document.getElementById('barra-progresso').style.width = porcentagem + '%';
+        }
+
+        function fazerPedido(nomePrato, tempoPreparo) {
+            // Esconde o cardápio e mostra a tela de status
+            document.getElementById('menu-section').classList.add('hidden');
+            document.getElementById('status-section').classList.remove('hidden');
+            document.getElementById('pedido-nome').innerText = nomePrato;
+            
+            // FASE 1: PREPARO NA COZINHA
+            document.getElementById('pedido-fase').innerText = "👨‍🍳 Preparando na cozinha...";
+            let tempoRestante = tempoPreparo;
+            
+            timerInterval = setInterval(() => {
+                atualizarContador(tempoRestante, 1, tempoPreparo);
+                tempoRestante--;
+
+                if (tempoRestante < 0) {
+                    clearInterval(timerInterval);
+                    iniciarFaseRoboBalcao();
+                }
+            }, 1000);
+        }
+
+        function iniciarFaseRoboBalcao() {
+            // FASE 2: ROBÔ VAI PARA O BALCÃO E ESPERA
+            // Manda o robô para a cozinha/balcão
+            enviarComandoROS('balcao');
+            
+            document.getElementById('pedido-fase').innerText = "🤖 Robô indo buscar no balcão...";
+            document.getElementById('barra-progresso').className = "bg-orange-500 h-4 rounded-full transition-all duration-1000 w-0";
+            
+            // Tempo total da fase 2: Viagem até o balcão (estimado 10s) + Espera no balcão (20s) = 30s
+            let tempoEsperaBalcao = 30; 
+            let tempoRestante = tempoEsperaBalcao;
+
+            timerInterval = setInterval(() => {
+                atualizarContador(tempoRestante, 2, tempoEsperaBalcao);
+                tempoRestante--;
+
+                // Altera a mensagem no meio do caminho para indicar que ele está esperando a comida
+                if (tempoRestante === 20) {
+                    document.getElementById('pedido-fase').innerText = "⏱️ Robô aguardando a comida no balcão...";
+                }
+
+                if (tempoRestante < 0) {
+                    clearInterval(timerInterval);
+                    iniciarFaseRoboMesa();
+                }
+            }, 1000);
+        }
+
+        function iniciarFaseRoboMesa() {
+            // FASE 3: ROBÔ VAI PARA A MESA DO CLIENTE
+            // Manda o robô para a mesa configurada neste tablet
+            enviarComandoROS(mesaConfigurada);
+            
+            document.getElementById('pedido-fase').innerText = "🚀 Pedido a caminho da sua mesa!";
+            document.getElementById('barra-progresso').className = "bg-emerald-500 h-4 rounded-full transition-all duration-1000 w-0";
+            
+            // Tempo estimado de viagem do balcão até a mesa: 15s
+            let tempoViagem = 15;
+            let tempoRestante = tempoViagem;
+
+            timerInterval = setInterval(() => {
+                atualizarContador(tempoRestante, 3, tempoViagem);
+                tempoRestante--;
+
+                if (tempoRestante < 0) {
+                    clearInterval(timerInterval);
+                    finalizarPedido();
+                }
+            }, 1000);
+        }
+
+        function finalizarPedido() {
+            document.getElementById('pedido-fase').innerText = "✅ Pedido Entregue! Bom apetite!";
+            document.getElementById('contador-tempo').innerText = "00";
+            document.getElementById('barra-progresso').style.width = '100%';
+
+            // Após 10 segundos, reseta a interface para novos pedidos
+            setTimeout(() => {
+                document.getElementById('status-section').classList.add('hidden');
+                document.getElementById('menu-section').classList.remove('hidden');
+            }, 10000);
+        }
+    </script>
+</body>
+</html>
