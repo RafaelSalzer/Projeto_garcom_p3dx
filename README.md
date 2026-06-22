@@ -1,0 +1,113 @@
+🤖 Projeto Garçom Autônomo - Pioneer 3DX
+
+Este projeto implementa um sistema completo de robótica de serviço para restaurantes. Utilizando o ROS (Robot Operating System) e o simulador Gazebo, o robô Pioneer 3DX atua como um garçom autônomo, recebendo pedidos através de uma interface web (tablet) e navegando desviando de obstáculos até as mesas.
+
+📋 Arquitetura do Sistema
+
+O projeto é dividido nos seguintes pacotes principais:
+
+garcom_gazebo: Contém o ambiente físico 3D do restaurante e o modelo do robô.
+
+garcom_mapping: Responsável pela geração de mapas usando SLAM (Gmapping).
+
+garcom_navigation: Cérebro da movimentação. Configura o AMCL (localização) e o Move Base (planejamento de rotas e campos de força).
+
+garcom_core: Contém os scripts Python de alto nível que orquestram a lógica de atendimento.
+
+Interface Web: Um aplicativo HTML/JS rodando no navegador que se comunica com o ROS via WebSockets.
+
+⚙️ Pré-requisitos e Instalação
+
+Antes de rodar o projeto, certifique-se de ter o ROS Noetic instalado no Ubuntu.
+Você também precisará do pacote rosbridge_suite para permitir a comunicação com o tablet web. Instale-o com:
+
+sudo apt-get install ros-noetic-rosbridge-suite
+
+
+🚀 Como Executar o Projeto (Passo a Passo)
+
+Para ligar todo o ecossistema do robô, você precisará abrir 5 abas/terminais diferentes.
+
+Terminal 1: Ligar o Mundo Físico (Simulador)
+
+Inicia o Gazebo com o cenário do restaurante e o robô posicionado.
+
+roslaunch garcom_gazebo simulacao.launch
+
+
+Terminal 2: Ligar a Inteligência de Navegação
+
+Carrega o mapa estático, os campos de força das mesas e o algoritmo de planejamento de rotas.
+
+roslaunch garcom_navigation navegacao.launch
+
+
+Terminal 3: Ligar a Visão do Administrador (RViz)
+
+Inicia a interface de visualização do ROS.
+
+rviz
+
+
+⚠️ Ação Obrigatória: Assim que o RViz abrir, use o botão superior verde "2D Pose Estimate" e clique no mapa para indicar onde o robô está posicionado inicialmente. Isso calibra o sistema de localização.
+
+Terminal 4: Ligar a Antena Wi-Fi (WebSockets)
+
+Inicia a ponte de comunicação que permite que sites e aplicativos conversem com o ROS na porta 9090.
+
+roslaunch rosbridge_server rosbridge_websocket.launch
+
+
+Terminal 5: Ligar o Cérebro de Pedidos
+
+Inicia o script Python que fica em segundo plano escutando os pedidos que chegam da internet.
+
+rosrun garcom_core enviar_pedido.py
+
+
+📱 Utilizando o Tablet do Cliente (Interface Web)
+
+Com todos os 5 terminais rodando, é hora de usar o aplicativo do cliente:
+
+Abra o arquivo interface_garcom.html usando a extensão Live Server no VS Code.
+
+Na tela de configuração, selecione a Mesa desejada (ex: Mesa 1).
+
+O campo IP já estará preenchido com localhost (ou coloque o IP da rede). Clique em Conectar.
+
+Quando o botão ficar verde ("SISTEMA ONLINE"), clique em Iniciar Atendimento.
+
+Faça um pedido no Cardápio Digital!
+
+A interface irá automaticamente:
+
+Simular o tempo de preparo da cozinha.
+
+Mandar o robô ir até o balcão buscar a comida.
+
+Aguardar no balcão por alguns segundos.
+
+Mandar o robô navegar até a mesa exata do cliente para a entrega!
+
+🗺️ Como Refazer o Mapeamento (Avançado)
+
+Caso mude as mesas de lugar no arquivo .world, você precisará gerar um novo mapa:
+
+Abra a simulação (simulacao.launch).
+
+Rode o Gmapping:
+
+rosrun gmapping slam_gmapping scan:=/laser/scan
+
+
+Movimente o robô manualmente:
+
+rosrun teleop_twist_keyboard teleop_twist_keyboard.py
+
+
+Salve o mapa:
+
+rosrun map_server map_saver -f ~/catkin_ws/src/projeto_garcom_p3dx/garcom_mapping/maps/mapa_novo
+
+
+Atualize o arquivo navegacao.launch para usar o novo mapa salvo.
