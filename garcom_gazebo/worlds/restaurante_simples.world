@@ -1,0 +1,204 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="restaurante_simples">
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <!-- Parede superior -->
+    <model name="parede_superior">
+      <static>true</static>
+      <pose>0 3 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>6 0.1 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>6 0.1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0.8 1</ambient>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Parede inferior -->
+    <model name="parede_inferior">
+      <static>true</static>
+      <pose>0 -3 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>6 0.1 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>6 0.1 1</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Parede esquerda -->
+    <model name="parede_esquerda">
+      <static>true</static>
+      <pose>-3 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 6 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 6 1</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Parede direita -->
+    <model name="parede_direita">
+      <static>true</static>
+      <pose>3 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 6 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 6 1</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Cozinha -->
+    <model name="cozinha">
+      <static>true</static>
+      <pose>-2.2 0 0.15 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.8 1.2 0.3</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.8 1.2 0.3</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.7 0.4 0.2 1</ambient>
+            <diffuse>0.7 0.4 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Mesa 1 -->
+    <model name="mesa_1">
+      <static>true</static>
+      <pose>1.5 1.5 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.35</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.35</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Mesa 2 -->
+    <model name="mesa_2">
+      <static>true</static>
+      <pose>1.5 0 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.35</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.35</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Mesa 3 -->
+    <model name="mesa_3">
+      <static>true</static>
+      <pose>1.5 -1.5 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.35</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.35</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

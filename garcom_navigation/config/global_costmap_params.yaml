@@ -1,0 +1,22 @@
+global_costmap:
+  # Referencial absoluto do mapa gerado pelo SLAM
+  global_frame: map
+  
+  # Referencial físico preso ao centro do Pioneer 3DX
+  robot_base_frame: base_link
+
+  # Frequência (em Hz) com que o mapa de custo global é recalculado.
+  # Como as mesas do restaurante são fixas, 1.0 Hz (uma vez por segundo) é suficiente e economiza CPU.
+  update_frequency: 1.0
+  
+  # Frequência com que o mapa publica informações visuais para o RViz.
+  publish_frequency: 0.5
+
+  # DIZ AO ROS PARA CARREGAR O MAPA FIXO SALVO
+  static_map: true
+
+  # Configuração de camadas (layers) para o mapa global
+  plugins:
+    - {name: static_layer,            type: "costmap_2d::StaticLayer"}
+    - {name: obstacle_layer,          type: "costmap_2d::ObstacleLayer"}
+    - {name: inflation_layer,         type: "costmap_2d::InflationLayer"}

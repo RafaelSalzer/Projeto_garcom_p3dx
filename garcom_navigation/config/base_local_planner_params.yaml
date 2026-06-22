@@ -1,0 +1,45 @@
+TrajectoryPlannerROS:
+  
+  # --- LIMITES CINEMÁTICOS DOS ATUADORES ---
+  # Velocidade linear (frente/trás) em m/s. 
+  # 0.5 m/s é uma velocidade segura de operação comercial para não derrubar bandejas.
+  max_vel_x: 0.35
+  min_vel_x: 0.1
+  
+  # O P3DX tem motores de passo fortes. Limitar a aceleração (m/s²) evita 
+  # trancos na partida, o que é vital para o transporte de cargas dinâmicas.
+  acc_lim_x: 1.0
+
+  # Velocidade e aceleração angular (rotação) em rad/s.
+  max_vel_theta: 1.0
+  min_in_place_vel_theta: 0.4
+  acc_lim_theta: 1.5
+
+  # O robô é de tração diferencial (não anda de lado como rodas holonômicas).
+  holonomic_robot: false
+
+  # --- TOLERÂNCIAS DE ESTADO ESTACIONÁRIO (OBJETIVO) ---
+  # Define a margem de erro aceitável ao chegar na mesa.
+  # 15 cm de margem linear (x, y) e ~11 graus (0.2 rad) de margem angular.
+  xy_goal_tolerance: 0.15
+  yaw_goal_tolerance: 0.2
+  
+  # Se o robô oscilar tentando corrigir os últimos milímetros, essa flag trava a posição.
+  latch_xy_goal_tolerance: false
+
+  # --- PARÂMETROS DA MALHA DE PREVISÃO (FORWARD SIMULATION) ---
+  # Quantos segundos no futuro o controlador deve simular para calcular a viabilidade da curva.
+  # 1.5s a 2.0s é o ideal. Menos que isso, o robô não tem tempo de frear. Mais que isso, exige muita CPU.
+  sim_time: 2.5
+  
+  # Granularidade do controle: quantos comandos de velocidade diferentes o algoritmo 
+  # vai testar por ciclo de processamento antes de escolher o melhor.
+  vx_samples: 10
+  vtheta_samples: 20
+
+  # --- PESOS DA FUNÇÃO DE CUSTO LQR/PID ---
+  # Pondera o que é mais importante na malha de controle durante a navegação.
+  meter_scoring: true            # Usa metros no cálculo ao invés de células do mapa
+  pdist_scale: 0.8               # Peso para manter o robô colado na rota global planejada
+  gdist_scale: 0.6               # Peso para tentar alcançar o destino final o mais rápido possível
+  occdist_scale: 0.1         # Peso para fugir dos obstáculos do mapa de custo local

@@ -1,0 +1,40 @@
+# --- CONFIGURAÇÕES GEOMÉTRICAS DO ROBÔ ---
+# O P3DX é aproximadamente cilíndrico. Um raio de 0.25m (25 cm) garante uma margem segura
+# que cobre o chassi e as rodas sem deixar o robô largo demais para os corredores.
+robot_radius: 0.35
+
+# --- CAMADA DE OBSTÁCULOS (RECONHECIMENTO DO MUNDO) ---
+obstacle_layer:
+  enabled: true
+  
+  # Distância máxima (em metros) em que o robô consegue inserir um obstáculo no mapa.
+  # Embora o laser leia mais longe, limitar a 3.0m evita ruídos distantes.
+  obstacle_range: 3.0
+  
+  # Distância máxima para "limpar" um obstáculo do mapa usando o feixe do laser.
+  # Se o laser passar direto até 3.5m, o ROS entende que aquele caminho foi liberado.
+  raytrace_range: 3.5
+
+  # Definição dos sensores que alimentam o mapa de custo
+  observation_sources: laser_scan_sensor
+
+  laser_scan_sensor:
+    sensor_frame: laser                 # Frame do sensor definido no URDF do P3DX
+    topic: /laser/scan                  # O tópico exato que confirmamos no rostopic list
+    data_type: LaserScan
+    marking: true                       # Permite que o sensor marque obstáculos novos no mapa
+    clearing: true                      # Permite que o sensor apague obstáculos que sumiram
+    expected_update_rate: 0.0           # Se 0.0, não trava a navegação caso o laser atrase um frame
+
+# --- CAMADA DE INFLAÇÃO (CAMPO DE FORÇA) ---
+inflation_layer:
+  enabled: true
+  
+  # O raio de inflação cria uma zona onde o custo de passar é proporcionalmente alto.
+  # Configurado em 0.55m, garante que o centro do robô (0.25m) fique a pelo menos 30 cm 
+  # de distância livre de qualquer quina de mesa ou parede.
+  inflation_radius: 1
+  
+  # Define a inclinação da curva de custo decrescente a partir do obstáculo.
+  # Quanto maior o valor, mais rápido o custo cai conforme o robô se afasta da parede.
+  cost_scaling_factor: 2.5

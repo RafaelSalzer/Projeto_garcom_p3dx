@@ -1,0 +1,33 @@
+local_costmap:
+  # IMPORTANTE: O referencial global aqui é a odometria (odom), pois precisamos de 
+  # um sistema contínuo e rápido para calcular desvios imediatos de trajetória.
+  global_frame: odom
+  
+  # Referencial físico do robô
+  robot_base_frame: base_link
+
+  # Frequência de atualização (em Hz). Como lida com obstáculos dinâmicos, 
+  # precisa ser mais rápida. 5.0 Hz garante uma resposta ágil a colisões iminentes.
+  update_frequency: 5.0
+  
+  # Frequência de publicação para visualização no RViz
+  publish_frequency: 2.0
+
+  # NÃO usa o mapa estático. Ele limpa e redesenha o ambiente conforme o robô anda.
+  static_map: false
+  
+  # ATIVA A JANELA MÓVEL (O mapa se move junto com o robô)
+  rolling_window: true
+  
+  # Dimensões da janela móvel (em metros). 
+  # Um quadrado de 3.0m x 3.0m centralizado no robô é perfeito para o corredor do restaurante.
+  width: 3.0
+  height: 3.0
+  
+  # Resolução do mapa local (5cm por pixel), casando com a resolução do gmapping.
+  resolution: 0.05
+
+  # Configuração de camadas (O mapa local NÃO tem a camada estática)
+  plugins:
+    - {name: obstacle_layer,          type: "costmap_2d::ObstacleLayer"}
+    - {name: inflation_layer,         type: "costmap_2d::InflationLayer"}
